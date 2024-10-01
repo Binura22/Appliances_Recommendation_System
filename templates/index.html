@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <title>SMART DEALS</title>
+</head>
+<body>
+    
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="/" class="logo">SMART DEALS</a>
+            <ul class="nav-links">
+                <li><a href="/">Home</a></li>
+                <li><a href="#about">About Us</a></li>
+                <li><a href="#products">Products</a></li>
+                <li><a href="#contact">Contact Us</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1>Discover Top Appliances in One Place</h1>
+
+        <!-- Advertisement Banner Section -->
+        <div class="banner-container">
+            <img src="{{ url_for('static', filename='images/app-banner1.png') }}" alt="Advertisement 1" class="active">
+            <img src="{{ url_for('static', filename='images/app-banner2.png') }}" alt="Advertisement 2">
+            <img src="{{ url_for('static', filename='images/app-banner3.jpg') }}" alt="Advertisement 3">
+            <img src="{{ url_for('static', filename='images/app-banner4.jpg') }}" alt="Advertisement 4">
+            <img src="{{ url_for('static', filename='images/app-banner5.jpg') }}" alt="Advertisement 5">
+        </div>
+
+        <form action="/search" method="POST">
+            <input type="text" name="query" placeholder="Search Your Products">
+            <button type="submit">Search</button>
+        </form>
+        
+        {% if results %}
+        <hr>
+        <ul class="results-list">
+            {% for result in results %}
+            <li class="result-item">
+                <a href="/product/{{ result['asin'] }}" class="product-link">
+                    <img src="{{ result['hi_res_image'] }}" alt="{{ result['product_title'] }}" class="card-img">
+                    <hr> 
+                    <h3>{{ result['product_title'][:20] }}</h3>
+                </a>
+                <p><strong>Category:</strong> {{ result['main_category'] }}</p>
+                <p><strong>Rating:</strong> {{ result['rating'] }} / 5</p>
+            </li>
+            {% endfor %}
+        </ul>
+
+        <!-- Pagination Links -->
+        <div class="pagination">
+            {% if page > 1 %}
+                <a href="/search?page={{ page - 1 }}&query={{ query }}">Previous</a>
+            {% endif %}
+            <span>Page {{ page }}</span>
+            {% if results|length == 20 %}
+                <a href="/search?page={{ page + 1 }}&query={{ query }}">Next</a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Footer Section -->
+    <footer>
+        <div class="footer-container">
+            <div class="footer-content">
+                <p>&copy; 2024 SMART DEALS. All rights reserved.</p>
+                <ul class="footer-links">
+                    <li><a href="#about">About Us</a></li>
+                    <li><a href="#contact">Contact Us</a></li>
+                    <li><a href="/privacy-policy">Privacy Policy</a></li>
+                </ul>
+            </div>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/banner.js') }}"></script>
+</body>
+</html>
