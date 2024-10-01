@@ -46,7 +46,7 @@
                 <a href="/product/{{ result['asin'] }}" class="product-link">
                     <img src="{{ result['hi_res_image'] }}" alt="{{ result['product_title'] }}" class="card-img">
                     <hr> 
-                    <h3>{{ result['product_title'][:20] }}</h3>
+                    <h3>{{ ' '.join(result['product_title'].split()[:4]) }}</h3>
                 </a>
                 <p><strong>Category:</strong> {{ result['main_category'] }}</p>
                 <p><strong>Rating:</strong> {{ result['rating'] }} / 5</p>
