@@ -11,7 +11,6 @@
     <!-- Navigation Bar -->
     <nav class="navbar">
         <div class="container">
-            
             <img src="{{ url_for('static', filename='images/logo.png') }}" alt="logo" class="logo">
             <ul class="nav-links">
                 <li><a href="/">Home</a></li>
@@ -50,7 +49,7 @@
                     <h3>{{ ' '.join(result['product_title'].split()[:4]) }}</h3>
                 </a>
                 <p><strong>Category:</strong> {{ result['main_category'] }}</p>
-                <p><strong>Rating:</strong> {{ result['rating'] }} / 5</p>
+                <p><strong>Rating:</strong> {{ result['average_rating'] }} / 5</p>
             </li>
             {% endfor %}
         </ul>
@@ -58,13 +57,13 @@
         <!-- Pagination Links -->
         <div class="pagination">
             {% if page > 1 %}
-                <a href="/search?page={{ page - 1 }}&query={{ query }}">Previous</a>
+                <button class="move-button" onclick="location.href='/search?page={{ page - 1 }}&query={{ query }}'">Previous</button>
             {% endif %}
             <span>Page {{ page }}</span>
             {% if results|length == 20 %}
-                <a href="/search?page={{ page + 1 }}&query={{ query }}">Next</a>
+                <button class="move-button" onclick="location.href='/search?page={{ page + 1 }}&query={{ query }}'">Next</button>
             {% endif %}
-        </div>
+        </div>        
         {% endif %}
     </div>
 
