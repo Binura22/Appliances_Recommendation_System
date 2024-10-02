@@ -137,6 +137,8 @@ h3 {
 
 .navbar .logo {
     font-size: 1.5rem;
+    max-width: 300px;
+    max-height: 70px;
     color: #fff; 
     text-decoration: none;
 }
