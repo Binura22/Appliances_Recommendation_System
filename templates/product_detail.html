@@ -10,7 +10,7 @@
     <!-- Navigation Bar -->
     <nav class="navbar">
         <div class="container">
-            <a href="/" class="logo">SMART DEALS</a>
+            <img src="{{ url_for('static', filename='images/logo.jpg') }}" alt="logo" class="logo">
             <ul class="nav-links">
                 <li><a href="/">Home</a></li>
                 <li><a href="#about">About Us</a></li>
@@ -24,10 +24,10 @@
         <h1>{{ product['product_title'] }}</h1>
         <img src="{{ product['hi_res_image'] }}" alt="{{ product['product_title'] }}" class="card-img">
         <p><strong>Category:</strong> {{ product['main_category'] }}</p>
-        <p><strong>Rating:</strong> {{ product['rating'] }} / 5</p>
+        <p><strong>Rating:</strong> {{ product['average_rating'] }} / 5</p>
         <p><strong>Description:</strong> {{ product['description'] }}</p>
     </div>
-
+    
     <!-- Footer Section -->
     <footer>
         <div class="footer-container">

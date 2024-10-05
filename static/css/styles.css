@@ -1,7 +1,6 @@
 body {
     font-family: Arial, sans-serif;
     margin: 0;
-    padding: 2px;
     background-color: #f9f9f9;
 }
 
@@ -40,6 +39,7 @@ button {
 }
 .container {
     max-width: 1200px;
+    min-width: 1200px;
     margin: auto;
     text-align: center;
 }
@@ -67,20 +67,18 @@ form {
     box-sizing: border-box; 
     transition: box-shadow 0.3s;
     margin-bottom: 20px;
+    /* min-width: 250px; */
 }
 
 .result-item:hover {
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 10px #28a745;
 }
 
 .card-img {
-    max-width: 100%;
-    max-height: 150px; 
-    min-height: 150px;
-    padding: auto;
-    width: auto; 
-    height: auto; 
-    object-fit: cover;
+    width: 100%; 
+    max-height: 150px;
+    min-height: 150px; 
+    object-fit: contain; 
     border-radius: 5px; 
 }
 
@@ -114,6 +112,7 @@ h3 {
     height: 100%;
     object-fit: cover;
     position: absolute;
+    object-fit: contain; 
     top: 0;
     left: 0;
     opacity: 0;
@@ -128,6 +127,7 @@ h3 {
 .navbar {
     background-color: #333; 
     color: #fff; 
+    border-bottom: #28a745 7px solid;
     
 }
 
@@ -139,7 +139,11 @@ h3 {
 
 .navbar .logo {
     font-size: 1.5rem;
-    color: #fff; /* White color for the logo */
+    max-width: 300px;
+    max-height: 80px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    color: #fff; 
     text-decoration: none;
 }
 
@@ -160,7 +164,7 @@ h3 {
 }
 
 .navbar .nav-links a:hover {
-    color: #ddd; /* Light gray on hover for contrast */
+    color: #28a745; 
 }
 
 
@@ -170,7 +174,8 @@ footer {
     color: #fff;
     padding: 20px;
     text-align: center;
-    margin-top: auto;
+    margin-top: 10px;
+    border-top: #28a745 7px solid;
 }
 
 .footer-container {
@@ -254,9 +259,19 @@ footer {
     margin: 0 5px;
 }
 
+.move-button{
+    height: 40px;
+    width: 100px;
+    border-radius: 5px;
+    background-color: #28a745;
+    padding: auto;
+}
 
 
 
+.hot-products-container{
+    display: flex;
+}
 .product-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
