@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recommended Products</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <h1>Recommended Products for User {{ user_id }}</h1>
+    
+    <div class="product-grid">
+        {% if products %}
+            {% for product in products %}
+            <div class="product-card">
+                <a href="{{ url_for('product_detail', asin=product['asin']) }}">
+                    <img src="{{ product['hi_res_image'] }}" alt="{{ product['product_title'] }}">
+                    <h3>{{ product['product_title'] }}</h3>
+                    <p>{{ product['main_category'] }}</p>
+                </a>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p>No recommendations available for this user.</p>
+        {% endif %}
+    </div>
+
+    <a href="{{ url_for('index') }}">Back to Product List</a>
+</body>
+</html>

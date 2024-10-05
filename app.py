@@ -4,6 +4,8 @@ import gdown
 import os
 import ast
 from datetime import datetime
+import numpy as np
+from sklearn.metrics.pairwise import cosine_similarity
 
 app = Flask(__name__)
 
@@ -17,6 +19,8 @@ if not os.path.exists(output_csv):
 
 # Load the datasets
 data = pd.read_csv(output_csv)
+# Load the user-item matrix from the CSV file
+user_item_matrix = pd.read_csv('user_item_matrix.csv', index_col='user_id')
 
 # Remove duplicate products, keeping the first occurrence by parent_asin
 data_unique = data.drop_duplicates(subset='parent_asin', keep='first')
@@ -34,6 +38,14 @@ def get_hi_res_image(images):
 
 # Apply the function to the images column
 data_unique['hi_res_image'] = data_unique['images'].apply(get_hi_res_image)
+
+# Load the preprocessed user-item matrix
+user_item_matrix = pd.read_csv('user_item_matrix.csv', index_col='user_id')
+original_nan_mask = pd.read_csv('original_nan_mask.csv', index_col='user_id')
+
+# Compute user-user similarity matrix using cosine similarity
+user_similarity = cosine_similarity(user_item_matrix)
+
 
 # Function to get the top seasonatl products for the current month
 def get_top_seasonal_products():
@@ -110,6 +122,48 @@ def product_detail(asin):
     # Filter the product by asin for detailed view
     product = data_unique[data_unique['asin'] == asin].iloc[0]
     return render_template('product_detail.html', product=product)
+
+
+@app.route('/collab-recommend/<user_id>')
+def collab_recommend(user_id):
+    # Check if the user exists in the user_item_matrix
+    if user_id not in user_item_matrix.index:
+        return f"No data available for user {user_id}", 404
+    
+    # Use original_nan_mask to find unrated items (originally NaN)
+    unrated_items = original_nan_mask.loc[user_id]
+    unrated_items = unrated_items[unrated_items].index  # Filter the originally unrated items
+    
+    if len(unrated_items) == 0:
+        return f"User {user_id} has rated all items.", 200
+    
+    # Compute similarity scores between the target user and other users
+    similarity_scores = user_similarity[user_item_matrix.index.get_loc(user_id)]
+
+    # Sort users by similarity scores (excluding the user themselves)
+    similar_users_indices = similarity_scores.argsort()[::-1][1:]
+    
+    # Get the ratings of similar users for the unrated items
+    similar_users_ratings = user_item_matrix.iloc[similar_users_indices][unrated_items]
+
+    # Calculate predicted ratings for the unrated items based on similar users' ratings
+    weighted_ratings = similar_users_ratings.T.dot(similarity_scores[similar_users_indices])
+    similarity_sums = similarity_scores[similar_users_indices].sum()
+
+    predicted_ratings = weighted_ratings / similarity_sums
+    
+    # Get the top N recommended items (let's say top 5)
+    top_recommended_items = predicted_ratings.nlargest(5).index
+    
+    # Retrieve product details from the original dataset for these recommendations
+    recommended_products = data[data['asin'].isin(top_recommended_items)]
+
+    # If no products found, return a message
+    if recommended_products.empty:
+        return f"No recommendations available for user {user_id}", 200
+    
+    # Render the recommendations page with the recommended products
+    return render_template('recommendations.html', products=recommended_products.to_dict(orient='records'), user_id=user_id)
 
 if __name__ == '__main__':
     app.run(debug=True)
