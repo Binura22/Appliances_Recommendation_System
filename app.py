@@ -19,8 +19,6 @@ if not os.path.exists(output_csv):
 
 # Load the datasets
 data = pd.read_csv(output_csv)
-# Load the user-item matrix from the CSV file
-user_item_matrix = pd.read_csv('user_item_matrix.csv', index_col='user_id')
 
 # Remove duplicate products, keeping the first occurrence by parent_asin
 data_unique = data.drop_duplicates(subset='parent_asin', keep='first')
