@@ -7,24 +7,53 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
-    <h1>Recommended Products for User {{ user_id }}</h1>
-    
-    <div class="product-grid">
-        {% if products %}
-            {% for product in products %}
-            <div class="product-card">
-                <a href="{{ url_for('product_detail', asin=product['asin']) }}">
-                    <img src="{{ product['hi_res_image'] }}" alt="{{ product['product_title'] }}">
-                    <h3>{{ product['product_title'] }}</h3>
-                    <p>{{ product['main_category'] }}</p>
-                </a>
-            </div>
-            {% endfor %}
-        {% else %}
-            <p>No recommendations available for this user.</p>
-        {% endif %}
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="container">
+            <img src="{{ url_for('static', filename='images/logo.jpg') }}" alt="logo" class="logo">
+            <ul class="nav-links">
+                <li><a href="/">Home</a></li>
+                <li><a href="#about">About Us</a></li>
+                <li><a href="#products">Products</a></li>
+                <li><a href="#contact">Contact Us</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h2>Recommended Products for User {{ user_id }}</h2>
+        <ul class="results-list">
+            {% if products %}
+                {% for product in products %}
+                <li class="result-item">
+                    <a href="/product/{{ product['asin'] }}" class="product-link">
+                        <img src="{{ product['hi_res_image'] }}" alt="{{ product['product_title'] }}" class="card-img">
+                        <h3>{{ ' '.join(product['product_title'].split()[:4]) }}</h3>
+                    </a>
+                    <p><strong>Rating:</strong> {{ product['average_rating'] }} / 5</p>
+                </li>
+                {% endfor %}
+            {% else %}
+                <p>No recommendations available for this user.</p>
+            {% endif %}
+        </ul>
+
+        <a href="{{ url_for('index') }}">Back to Product List</a>
     </div>
 
-    <a href="{{ url_for('index') }}">Back to Product List</a>
+    <!-- Footer Section -->
+    <footer>
+        <div class="footer-container">
+            <div class="footer-content">
+                <p>&copy; 2024 SMART DEALS. All rights reserved.</p>
+                <ul class="footer-links">
+                    <li><a href="#about">About Us</a></li>
+                    <li><a href="#contact">Contact Us</a></li>
+                    <li><a href="/privacy-policy">Privacy Policy</a></li>
+                </ul>
+            </div>
+        </div>
+    </footer>
+
 </body>
 </html>

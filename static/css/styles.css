@@ -67,7 +67,6 @@ form {
     box-sizing: border-box; 
     transition: box-shadow 0.3s;
     margin-bottom: 20px;
-    /* min-width: 250px; */
 }
 
 .result-item:hover {
