@@ -27,6 +27,21 @@
         <p><strong>Rating:</strong> {{ product['average_rating'] }} / 5</p>
         <p><strong>Description:</strong> {{ product['description'] }}</p>
     </div>
+
+    <!-- Recommended Products Section -->
+    <section class="recommended-products">
+        <h2>You may also like</h2>
+        <ul class="recommended-list">
+            {% for rec in recommended_products %}
+            <li class="recommended-item">
+                <a href="{{ url_for('product_detail', asin=rec['asin']) }}" class="product-link">
+                    <img src="{{ rec['hi_res_image'] }}" alt="Product Image" class="recommended-img">
+                    <h3>{{ rec['product_title'] }}</h3>
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+    </section>
     
     <!-- Footer Section -->
     <footer>

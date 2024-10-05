@@ -9,12 +9,12 @@
 <body>
     <h1>Recommended Products for User {{ user_id }}</h1>
     
-    <div class="product-grid">
+    <div class="results-list">
         {% if products %}
             {% for product in products %}
-            <div class="product-card">
-                <a href="{{ url_for('product_detail', asin=product['asin']) }}">
-                    <img src="{{ product['hi_res_image'] }}" alt="{{ product['product_title'] }}">
+            <div class="result-item">
+                <a href="{{ url_for('product_detail', asin=product['asin']) }}" class="product-link">
+                    <img src="{{ product['hi_res_image'] }}" alt="{{ product['product_title'] }}" class="card-img">
                     <h3>{{ product['product_title'] }}</h3>
                     <p>{{ product['main_category'] }}</p>
                 </a>
