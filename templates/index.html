@@ -11,7 +11,7 @@
     <!-- Navigation Bar -->
     <nav class="navbar">
         <div class="container">
-            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="logo" class="logo">
+            <img src="{{ url_for('static', filename='images/logo.jpg') }}" alt="logo" class="logo">
             <ul class="nav-links">
                 <li><a href="/">Home</a></li>
                 <li><a href="#about">About Us</a></li>
@@ -38,8 +38,25 @@
             <button type="submit">Search</button>
         </form>
         
+        <!-- Hot Products Section (Top 5 Seasonal Products) -->
+        <section class="hot-products">
+            <h2>Favorites of the Month</h2>
+            <ul class="results-list">
+                {% for product in top_5_products %}
+                <li class="result-item">
+                    <a href="/product/{{ product['asin'] }}" class="product-link">
+                        <img src="{{ product['hi_res_image'] }}" alt="{{ product['product_title'] }}" class="card-img">
+                        <h3>{{ ' '.join(product['product_title'].split()[:4]) }}</h3>
+                    </a>
+                    <p><strong>Rating:</strong> {{ product['average_rating'] }} / 5</p>
+                </li>
+                {% endfor %}
+            </ul>
+        </section>
+
         {% if results %}
         <hr>
+        <h2>Discover More</h2>
         <ul class="results-list">
             {% for result in results %}
             <li class="result-item">
