@@ -20,6 +20,13 @@ if not os.path.exists(output_csv):
 
 # Load the datasets
 data = pd.read_csv(output_csv)
+#Load the Appliances_content_based and cosine_sim_content matrix
+Appliances_content_based = pd.read_csv('Appliances_content_based.csv')
+cosine_sim_content = np.load('cosine_sim_content.npy')
+# Load the preprocessed user-item matrix
+user_item_matrix = pd.read_csv('user_item_matrix.csv', index_col='user_id')
+original_nan_mask = pd.read_csv('original_nan_mask.csv', index_col='user_id')
+
 
 
 # Remove duplicate products, keeping the first occurrence by parent_asin
@@ -39,9 +46,6 @@ def get_hi_res_image(images):
 # Apply the function to the images column
 data_unique['hi_res_image'] = data_unique['images'].apply(get_hi_res_image)
 
-# Load the preprocessed user-item matrix
-user_item_matrix = pd.read_csv('user_item_matrix.csv', index_col='user_id')
-original_nan_mask = pd.read_csv('original_nan_mask.csv', index_col='user_id')
 
 # Compute user-user similarity matrix using cosine similarity
 user_similarity = cosine_similarity(user_item_matrix)
@@ -95,7 +99,14 @@ def index():
 def product_detail(asin):
     # Filter the product by asin for detailed view
     product = data_unique[data_unique['asin'] == asin].iloc[0]
-    return render_template('product_detail.html', product=product)
+    # Get content-based recommendations for the product
+    similar_products = get_recommendations_content(asin, top_n=5)
+    
+    # Retrieve the detailed information of the recommended products
+    recommended_product_details = data_unique[data_unique['asin'].isin(similar_products)]
+    
+    # Render the product detail page and pass the similar products
+    return render_template('product_detail.html', product=product, recommended_products=recommended_product_details.to_dict(orient='records'))
 
 
 @app.route('/collab-recommend/<user_id>')
@@ -130,8 +141,8 @@ def collab_recommend(user_id):
     top_recommended_items = predicted_ratings.nlargest(10).index
     
     # Retrieve product details from the original dataset for these recommendations
-    recommended_products = data_unique[data_unique['asin'].isin(top_recommended_items)][['asin', 'product_title', 'hi_res_image', 'average_rating']]
 
+    recommended_products = data_unique[data_unique['asin'].isin(top_recommended_items)][['asin', 'product_title', 'hi_res_image', 'average_rating']]
 
     # If no products found, return a message
     if recommended_products.empty:
@@ -139,6 +150,50 @@ def collab_recommend(user_id):
     
     # Render the recommendations page with the recommended products
     return render_template('recommendations.html', products=recommended_products.to_dict(orient='records'), user_id=user_id)
+
+
+# recommendation function for content-based recommendations
+asin_index_content = pd.Series(Appliances_content_based.index, index=Appliances_content_based['asin']).drop_duplicates()
+
+def get_recommendations_content(asin, cosine_sim=cosine_sim_content, top_n=5):
+    # Check if 'asin' exists in the dataset
+    if asin not in asin_index_content:
+        return pd.Series([])
+
+    # Get the index of the product that matches the asin
+    idx = asin_index_content[asin]
+
+    # Get the pairwise similarity scores of all products with that product
+    sim_scores = list(enumerate(cosine_sim_content[idx]))
+
+    # Sort the products based on similarity scores in descending order
+    sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
+
+    # Get the scores of the top N most similar products (ignoring the first one as it is the same product)
+    sim_scores = sim_scores[1:top_n+1]
+
+    # Get the product indices
+    product_indices = [i[0] for i in sim_scores]
+    
+
+    # Return the top N most similar products
+    return Appliances_content_based['asin'].iloc[product_indices].drop_duplicates()
+
+@app.route('/recommend-content/<asin>')
+def recommend_content(asin):
+    # Get content-based recommendations
+    recommended_products = get_recommendations_content(asin, top_n=5)
+
+    # If no products found, return a message
+    if recommended_products.empty:
+        return f"No recommendations available for product {asin}", 200
+
+    # Retrieve product details from the original dataset for these recommendations
+    recommended_product_details = Appliances_content_based[Appliances_content_based['asin'].isin(recommended_products)]
+
+    # Render the recommendations page with the recommended products
+    return render_template('recommendations.html', products=recommended_product_details.to_dict(orient='records'), asin=asin)
+
 
 @app.route('/search', methods=['POST', 'GET'])
 def search():
@@ -165,5 +220,6 @@ def search():
     # Render the search results with pagination
     return render_template('index.html', query=query, results=paginated_results.to_dict(orient='records'), 
                            top_5_products=top_5_products, page=page)
+  
 if __name__ == '__main__':
     app.run(debug=True)
