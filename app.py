@@ -20,6 +20,16 @@ if not os.path.exists(output_csv):
 
 # Load the datasets
 data = pd.read_csv(output_csv)
+
+#column data preprocessing 
+data['description'] = data['description'].str.strip("[]").str.replace("'", "")
+
+for index in data.index:
+    if data.loc[index, 'main_category'] == "Amazon Home":
+        data.loc[index, 'main_category'] = data.loc[index, 'main_category'].replace("Amazon Home","Home Products")  
+    elif data.loc[index, 'main_category'] == "AMAZON FASHION":
+        data.loc[index, 'main_category'] = data.loc[index, 'main_category'].replace("AMAZON FASHION","Fashion")
+
 #Load the Appliances_content_based and cosine_sim_content matrix
 Appliances_content_based = pd.read_csv('Appliances_content_based.csv')
 cosine_sim_content = np.load('cosine_sim_content.npy')
