@@ -19,25 +19,36 @@
             </ul>
         </div>
     </nav>
-
     <div class="container">
         <h1>{{ product['product_title'] }}</h1>
-        <img src="{{ product['hi_res_image'] }}" alt="{{ product['product_title'] }}" class="card-img">
-        <p><strong>Category:</strong> {{ product['main_category'] }}</p>
-        <p><strong>Rating:</strong> {{ product['average_rating'] }} / 5</p>
-        <p><strong>Description:</strong> {{ product['description'] }}</p>
+        <div class="select_product_zone">
+            <div class="left-sub-container">
+                <img src="{{ product['hi_res_image'] }}" alt="{{ product['product_title'] }}" class="zone-img">
+            </div>
+            <div class="right-sub-container">
+                <p><strong>Category:</strong> {{ product['main_category'] }}</p>
+                <p><strong>Rating:</strong> {{ product['average_rating'] }} / 5</p>
+                <p><strong>Description:</strong> {{ product['description'] }} </p>
+            </div>
+        </div>
     </div>
+    
+
+    
 
     <!-- Recommended Products Section -->
-    <section class="recommended-products">
+    
+    <section class="container">
+        <hr>
         <h2>You may also like</h2>
-        <ul class="recommended-list">
+        <ul class="results-list">
             {% for rec in recommended_products %}
-            <li class="recommended-item">
+            <li class="result-item">
                 <a href="{{ url_for('product_detail', asin=rec['asin']) }}" class="product-link">
-                    <img src="{{ rec['hi_res_image'] }}" alt="Product Image" class="recommended-img">
-                    <h3>{{ rec['product_title'] }}</h3>
+                    <img src="{{ rec['hi_res_image'] }}" alt="Product Image" class="card-img">
+                    <h3>{{ ' '.join(product['product_title'].split()[:4]) }}</h3>
                 </a>
+                <p><strong>Rating:</strong> {{ product['average_rating'] }} / 5</p>
             </li>
             {% endfor %}
         </ul>
