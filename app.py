@@ -7,6 +7,7 @@ from datetime import datetime
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 
+
 app = Flask(__name__)
 
 # Google Drive file download link for the main dataset
@@ -48,7 +49,6 @@ data_unique['hi_res_image'] = data_unique['images'].apply(get_hi_res_image)
 
 # Compute user-user similarity matrix using cosine similarity
 user_similarity = cosine_similarity(user_item_matrix)
-
 
 # Function to get the top seasonatl products for the current month
 def get_top_seasonal_products():
@@ -94,31 +94,6 @@ def index():
     return render_template('index.html', results=paginated_data.to_dict(orient='records'), 
                            top_5_products=top_5_products, page=page)
 
-@app.route('/search', methods=['POST', 'GET'])
-def search():
-    # Check if the request is a POST or GET to retrieve the query
-    if request.method == 'POST':
-        query = request.form['query']
-    else:
-        query = request.args.get('query', '')  # Get the query from URL parameters if navigating through pages
-
-    # Filter results by product title or main category
-    results = data_unique[
-        (data_unique['product_title'].str.contains(query, case=False, na=False)) |
-        (data_unique['main_category'].str.contains(query, case=False, na=False))
-    ]
-    
-    # Pagination logic
-    page = request.args.get('page', 1, type=int)  # Get the current page number
-    per_page = 20  # Items per page
-    paginated_results = results.iloc[(page - 1) * per_page: page * per_page]
-
-    # get seasonal products
-    top_5_products = get_top_seasonal_products()
-
-    # Render the search results with pagination
-    return render_template('index.html', query=query, results=paginated_results.to_dict(orient='records'), 
-                           top_5_products=top_5_products, page=page)
 
 @app.route('/product/<asin>')
 def product_detail(asin):
@@ -162,11 +137,12 @@ def collab_recommend(user_id):
 
     predicted_ratings = weighted_ratings / similarity_sums
     
-    # Get the top N recommended items (let's say top 5)
-    top_recommended_items = predicted_ratings.nlargest(5).index
+    #Recommended top 5 items
+    top_recommended_items = predicted_ratings.nlargest(10).index
     
     # Retrieve product details from the original dataset for these recommendations
-    recommended_products = data_unique[data_unique['asin'].isin(top_recommended_items)]
+
+    recommended_products = data_unique[data_unique['asin'].isin(top_recommended_items)][['asin', 'product_title', 'hi_res_image', 'average_rating']]
 
     # If no products found, return a message
     if recommended_products.empty:
@@ -174,7 +150,6 @@ def collab_recommend(user_id):
     
     # Render the recommendations page with the recommended products
     return render_template('recommendations.html', products=recommended_products.to_dict(orient='records'), user_id=user_id)
-
 
 
 # recommendation function for content-based recommendations
@@ -220,5 +195,31 @@ def recommend_content(asin):
     return render_template('recommendations.html', products=recommended_product_details.to_dict(orient='records'), asin=asin)
 
 
+@app.route('/search', methods=['POST', 'GET'])
+def search():
+    # Check if the request is a POST or GET to retrieve the query
+    if request.method == 'POST':
+        query = request.form['query']
+    else:
+        query = request.args.get('query', '')  # Get the query from URL parameters if navigating through pages
+
+    # Filter results by product title or main category
+    results = data_unique[
+        (data_unique['product_title'].str.contains(query, case=False, na=False)) |
+        (data_unique['main_category'].str.contains(query, case=False, na=False))
+    ]
+    
+    # Pagination logic
+    page = request.args.get('page', 1, type=int)  # Get the current page number
+    per_page = 20  # Items per page
+    paginated_results = results.iloc[(page - 1) * per_page: page * per_page]
+
+    # get seasonal products
+    top_5_products = get_top_seasonal_products()
+
+    # Render the search results with pagination
+    return render_template('index.html', query=query, results=paginated_results.to_dict(orient='records'), 
+                           top_5_products=top_5_products, page=page)
+  
 if __name__ == '__main__':
     app.run(debug=True)
