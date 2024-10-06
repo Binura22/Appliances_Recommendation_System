@@ -21,6 +21,7 @@ if not os.path.exists(output_csv):
 # Load the datasets
 data = pd.read_csv(output_csv)
 
+
 # Remove duplicate products, keeping the first occurrence by parent_asin
 data_unique = data.drop_duplicates(subset='parent_asin', keep='first')
 
