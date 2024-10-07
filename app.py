@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect, url_for, flash, session
 import pandas as pd
 import gdown
 import os
@@ -6,9 +6,15 @@ import ast
 from datetime import datetime
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
+from database.recommendation_system_database import init_db, db
+from models.user import User
+from models.user_browsing_history import UserBrowsingHistory
 
 
 app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:2001@localhost/Recommendation System'
+app.config['SECRET_KEY'] = '6433d2f2e94417d4acf2d7071225c2aa811e6ab7987a88cf'
+init_db(app)
 
 # Google Drive file download link for the main dataset
 drive_id = "1RHu6Tk3vW63nMau14S7v6onRxkAk_x9A"
@@ -88,6 +94,42 @@ def get_top_seasonal_products():
     
     return top_5_products.to_dict(orient='records')
 
+@app.route('/signup', methods=['GET', 'POST'])
+def signup():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        if User.query.filter_by(username=username).first():
+            flash('Username already exists.')
+            return redirect(url_for('signup'))
+        new_user = User(username=username)
+        new_user.set_password(password)
+        db.session.add(new_user)
+        db.session.commit()
+        flash('Account created successfully. Please sign in.')
+        return redirect(url_for('signin'))
+    return render_template('signup.html')
+
+@app.route('/signin', methods=['GET', 'POST'])
+def signin():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        user = User.query.filter_by(username=username).first()
+        if user and user.check_password(password):
+            session['user_id'] = user.id
+            flash('Logged in successfully!')
+            return redirect(url_for('index'))
+        flash('Invalid username or password.')
+    return render_template('signin.html')
+
+@app.route('/logout')
+def logout():
+    session.pop('user_id', None)
+    flash('You have been logged out.')
+    return redirect(url_for('signin'))
+
+
 @app.route('/')
 def index():
 
@@ -115,6 +157,13 @@ def product_detail(asin):
     
     # Retrieve the detailed information of the recommended products
     recommended_product_details = data_unique[data_unique['asin'].isin(similar_products)]
+
+    # Store the browsing history if the user is logged in
+    if 'user_id' in session:
+        user_id = session['user_id']
+        new_history = UserBrowsingHistory(user_id=user_id, asin=asin)
+        db.session.add(new_history)
+        db.session.commit()
     
     # Render the product detail page and pass the similar products
     return render_template('product_detail.html', product=product, recommended_products=recommended_product_details.to_dict(orient='records'))
@@ -214,6 +263,31 @@ def recommend_content(asin):
 
     # Render the recommendations page with the recommended products
     return render_template('recommendations.html', products=recommended_product_details.to_dict(orient='records'), asin=asin)
+
+
+@app.route('/recommend-history')
+def recommend_based_on_history():
+    if 'user_id' not in session:
+        flash("Please log in to see recommendations.")
+        return redirect(url_for('signin'))
+    
+    user_id = session['user_id']
+    history_asins = db.session.query(UserBrowsingHistory.asin).filter_by(user_id=user_id).all()
+    history_asins = [asin for asin, in history_asins]
+
+    if not history_asins:
+        return "No browsing history found."
+
+    # Get content-based recommendations for all asins in the browsing history
+    recommended_products = []
+    for asin in history_asins:
+        recommended_products += get_recommendations_content(asin, top_n=2).tolist()
+
+    # Remove duplicates
+    recommended_products = list(set(recommended_products))
+    recommended_product_details = data_unique[data_unique['asin'].isin(recommended_products)]
+
+    return render_template('recommendations.html', products=recommended_product_details.to_dict(orient='records'))
 
 
 @app.route('/search', methods=['POST', 'GET'])
