@@ -37,8 +37,6 @@ cosine_sim_content = np.load('cosine_sim_content.npy')
 user_item_matrix = pd.read_csv('user_item_matrix.csv', index_col='user_id')
 original_nan_mask = pd.read_csv('original_nan_mask.csv', index_col='user_id')
 
-
-
 # Remove duplicate products, keeping the first occurrence by parent_asin
 data_unique = data.drop_duplicates(subset='parent_asin', keep='first')
 
@@ -92,17 +90,20 @@ def get_top_seasonal_products():
 
 @app.route('/')
 def index():
-    # Pagination logic for main products
+
+    category = request.args.get('category', None)
+    # Pagination logic
     page = request.args.get('page', 1, type=int)  # Get the current page number
     per_page = 20  # Number of products per page
-    paginated_data = data_unique.iloc[(page - 1) * per_page: page * per_page]
 
-    # Get the top 5 seasonal products
+    if category:
+        paginated_data = data_unique[data_unique['main_category'] == category].iloc[(page - 1) * per_page: page * per_page]
+    else:
+        paginated_data = data_unique.iloc[(page - 1) * per_page: page * per_page]
+
     top_5_products = get_top_seasonal_products()
-
-    # Render the homepage with both paginated products and hot products
     return render_template('index.html', results=paginated_data.to_dict(orient='records'), 
-                           top_5_products=top_5_products, page=page)
+                           top_5_products=top_5_products, page=page, selected_category=category)
 
 
 @app.route('/product/<asin>')
@@ -118,6 +119,16 @@ def product_detail(asin):
     # Render the product detail page and pass the similar products
     return render_template('product_detail.html', product=product, recommended_products=recommended_product_details.to_dict(orient='records'))
 
+# Category-based dropdown items
+categories = ['Home Products', 'Appliances', 'Tools & Home Improvement', 'Health & Personal Care', 
+              'Industrial & Scientific', 'Grocery', 'Office Products', 'All Electronics', 
+              'Automotive', 'Cell Phones & Accessories', 'Sports & Outdoors', 'All Beauty', 
+              'Camera & Photo', 'Baby', 'Pet Supplies', 'Home Audio & Theater', 'Fashion', 
+              'Musical Instruments', 'Toys & Games', 'Portable Audio & Accessories', 'Books']
+
+@app.context_processor
+def inject_categories():
+    return dict(categories=categories)
 
 @app.route('/collab-recommend/<user_id>')
 def collab_recommend(user_id):
@@ -231,5 +242,6 @@ def search():
     return render_template('index.html', query=query, results=paginated_results.to_dict(orient='records'), 
                            top_5_products=top_5_products, page=page)
   
+
 if __name__ == '__main__':
     app.run(debug=True)
