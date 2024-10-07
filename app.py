@@ -12,7 +12,7 @@ from models.user_browsing_history import UserBrowsingHistory
 
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:2001@localhost/Recommendation System'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:0408@localhost/Recommendation System'
 app.config['SECRET_KEY'] = '6433d2f2e94417d4acf2d7071225c2aa811e6ab7987a88cf'
 init_db(app)
 
@@ -287,7 +287,7 @@ def recommend_based_on_history():
     recommended_products = list(set(recommended_products))
     recommended_product_details = data_unique[data_unique['asin'].isin(recommended_products)]
 
-    return render_template('recommendations.html', products=recommended_product_details.to_dict(orient='records'))
+    return render_template('recommendation-history.html', products=recommended_product_details.to_dict(orient='records'))
 
 
 @app.route('/search', methods=['POST', 'GET'])
