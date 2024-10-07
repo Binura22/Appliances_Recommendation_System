@@ -1,13 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <title>SMART DEALS</title>
 </head>
+
 <body>
-    
+
     <!-- Navigation Bar -->
     <nav class="navbar">
         <div class="container">
@@ -22,18 +24,23 @@
     </nav>
 
     <div class="container">
-        <h1>Discover Top Appliances in One Place</h1>
+        <div class="banner">
+            <h1>Discover Top Appliances in One Place</h1>
 
-        <!-- Category Dropdown -->
-        <form method="get" action="/">
-            <label for="category">Select Category:</label>
-            <select name="category" id="category" onchange="this.form.submit()">
-                <option value="">All Categories</option>
-                {% for category in categories %}
-                <option value="{{ category }}" {% if selected_category == category %}selected{% endif %}>{{ category }}</option>
-                {% endfor %}
-            </select>
-        </form>
+            <!-- Category Dropdown -->
+            <form method="get" action="/">
+                <select name="category" id="category" class="category-dropdown" onchange="this.form.submit()">
+                    <option value="" disabled selected>Select Category</option>
+                    <option value="">All Categories</option>
+                    {% for category in categories %}
+                    <option value="{{ category }}" {% if selected_category==category %}selected{% endif %}>
+                        {{ category }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </form>
+        </div>
+
 
         <!-- Advertisement Banner Section -->
         <div class="banner-container">
@@ -84,7 +91,7 @@
         {% else %}
         <p>No results found for this category.</p>
         {% endif %}
-    
+
 
         <!-- Pagination -->
         <div class="pagination">
@@ -109,4 +116,5 @@
 
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>
+
 </html>
