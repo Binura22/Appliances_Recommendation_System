@@ -241,7 +241,9 @@ footer {
 
 .pagination {
     text-align: center;
+    align-items: center;
     margin-top: 20px;
+    max-width: 400px;
 }
 
 .pagination a {
@@ -258,7 +260,7 @@ footer {
     margin: 0 5px;
 }
 
-.move-button{
+button.move-{
     height: 40px;
     width: 100px;
     border-radius: 5px;
@@ -328,4 +330,121 @@ footer {
     min-height: 400px; 
     object-fit: contain;
     border-radius: 5px;
+}
+
+
+form {
+    display: flex;
+    justify-content: flex-end;
+    margin-right: 20px;
+}
+
+.category-dropdown {
+    padding: 10px 15px; 
+    font-size: 16px;
+    border: none; 
+    border-radius: 0; 
+    background-color: #f9f9f9; 
+    background-image: linear-gradient(to bottom, #f9f9f9, #ffffff); 
+    color: #333; 
+    cursor: pointer; 
+    outline: none; 
+    transition: background-color 0.3s ease, box-shadow 0.3s ease; 
+    width: 220px; 
+    height: 40px; 
+    margin-top: 20px; 
+}
+
+
+.category-dropdown option {
+    padding: 10px; 
+    background-color: #f9f9f9; 
+    color: #333; 
+}
+
+
+.category-dropdown option:hover {
+    background-color: #e0e0e0; 
+    color: #000; 
+}
+
+.category-dropdown:hover {
+    background-color: #e9f5ff; 
+    box-shadow: 0 0 8px rgba(0, 123, 255, 0.3); 
+}
+
+.category-dropdown::-webkit-scrollbar {
+    width: 10px;
+}
+
+.category-dropdown::-webkit-scrollbar-track {
+    background: #f1f1f1; 
+    border-radius: 10px;
+}
+
+.category-dropdown::-webkit-scrollbar-thumb {
+    background-color: #888; 
+    border-radius: 10px; 
+    border: 2px solid #f9f9f9; 
+}
+
+.category-dropdown::-webkit-scrollbar-thumb:hover {
+    background-color: #555; 
+}
+
+.category-dropdown option[disabled] {
+    color: #999;
+}
+
+
+.category-dropdown:hover,
+.category-dropdown:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+}
+
+
+button{
+    padding: 10px 20px;
+    background-color: #fff; 
+    color: #28a745; 
+    border: 2px solid #28a745; 
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 4px; 
+    transition: all 0.3s ease; 
+    outline: none; 
+    margin-left: 2px;
+}
+
+button:hover {
+    background-color: #28a745; 
+    color: #fff; 
+    border-color: #28a745; 
+    box-shadow: 0 0 8px rgba(40, 167, 69, 0.4); 
+}
+
+.banner {
+    display: flex;
+    justify-content: space-between; 
+    align-items: center; 
+    padding: 8px;
+    background-color: #e49d04; 
+    border: 2px solid #e0e0e0; 
+    border-radius: 8px; 
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
+    margin-bottom: 20px; 
+}
+
+.banner h1 {
+    font-family: 'Roboto', sans-serif; 
+    font-size: 28px; 
+    color: #f0f0f0; 
+    margin: 0;
+    text-align: center; 
+    text-transform: uppercase; 
+    flex: 1; 
+    letter-spacing: 1px; 
+    font-weight: 700;
 }
