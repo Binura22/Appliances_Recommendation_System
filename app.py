@@ -287,7 +287,7 @@ def recommend_based_on_history():
     recommended_products = list(set(recommended_products))
     recommended_product_details = data_unique[data_unique['asin'].isin(recommended_products)]
 
-    return render_template('recommendations.html', products=recommended_product_details.to_dict(orient='records'))
+    return render_template('recommendation-history.html', products=recommended_product_details.to_dict(orient='records'))
 
 
 @app.route('/search', methods=['POST', 'GET'])
