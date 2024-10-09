@@ -12,7 +12,7 @@ from models.user_browsing_history import UserBrowsingHistory
 
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:BdPS12#@localhost/Recommendation System'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:2001@localhost/Recommendation System'
 app.config['SECRET_KEY'] = '6433d2f2e94417d4acf2d7071225c2aa811e6ab7987a88cf'
 init_db(app)
 
@@ -135,7 +135,7 @@ def logout():
 
 @app.route('/')
 def index():
-
+    userid = session.get('user_id', None)
     category = request.args.get('category', None)
     # Pagination logic
     page = request.args.get('page', 1, type=int)  # Get the current page number
@@ -149,7 +149,7 @@ def index():
     top_5_products = get_top_seasonal_products()
     print(top_5_products)
     return render_template('index.html', results=paginated_data.to_dict(orient='records'), 
-                           top_5_products=top_5_products, page=page, selected_category=category)
+                           top_5_products=top_5_products, page=page, selected_category=category,userid=userid)
 
 
 @app.route('/product/<asin>')
@@ -187,14 +187,15 @@ def inject_categories():
 def collab_recommend(user_id):
     # Check if the user exists in the user_item_matrix
     if user_id not in user_item_matrix.index:
-        return f"No data available for user {user_id}", 404
+        return render_template('recommendations.html', message='No recommendations available at the moment. Start browsing our products to unlock personalized suggestions!')
+
     
     # Use original_nan_mask to find unrated items (originally NaN)
     unrated_items = original_nan_mask.loc[user_id]
     unrated_items = unrated_items[unrated_items].index  # Filter the originally unrated items
     
     if len(unrated_items) == 0:
-        return f"User {user_id} has rated all items.", 200
+        return render_template('recommendations.html', message='No recommendations available at the moment. Start browsing our products to unlock personalized suggestions!')
     
     # Compute similarity scores between the target user and other users
     similarity_scores = user_similarity[user_item_matrix.index.get_loc(user_id)]
@@ -220,7 +221,7 @@ def collab_recommend(user_id):
 
     # If no products found, return a message
     if recommended_products.empty:
-        return f"No recommendations available for user {user_id}", 200
+        return render_template('recommendations.html', message='No recommendations available at the moment. Start browsing our products to unlock personalized suggestions!')
     
     # Render the recommendations page with the recommended products
     return render_template('recommendations.html', products=recommended_products.to_dict(orient='records'), user_id=user_id)
