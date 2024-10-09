@@ -1,2 +1,4 @@
 *.csv
 *.npy
+*.npy
+migrate.py
