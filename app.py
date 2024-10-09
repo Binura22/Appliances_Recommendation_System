@@ -82,12 +82,15 @@ def get_top_seasonal_products():
     #Merge purchase counts and average ratings
     monthly_item_popularity = pd.merge(purchase_count, average_rating, on=['asin', 'month'])
     
-    #Sort by popularity and average rating
-    popular_items = monthly_item_popularity[monthly_item_popularity['month'] == current_month]
-    popular_items = popular_items.sort_values(by=['purchase_count', 'average_rating'], ascending=[False, False])
+    #sort by 'month' and 'purchase_count' to find the most popular items for each month
+    monthly_item_popularity  = monthly_item_popularity .sort_values(by=['month', 'purchase_count'], ascending=[True, False])
     
+    current_month = datetime.now().month
+
+    popular_items = monthly_item_popularity[monthly_item_popularity['month'] == current_month]
+
     #Get top 5 ASINs
-    top_5_asins = popular_items['asin'][:5].tolist()
+    top_5_asins = popular_items['asin'][:6].tolist()
     
     #Fetch the product details
     top_5_products = data_unique[data_unique['asin'].isin(top_5_asins)][['asin', 'product_title', 'hi_res_image', 'average_rating']]
@@ -144,6 +147,7 @@ def index():
         paginated_data = data_unique.iloc[(page - 1) * per_page: page * per_page]
 
     top_5_products = get_top_seasonal_products()
+    print(top_5_products)
     return render_template('index.html', results=paginated_data.to_dict(orient='records'), 
                            top_5_products=top_5_products, page=page, selected_category=category,userid=userid)
 
