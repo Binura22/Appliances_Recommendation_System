@@ -17,10 +17,14 @@
             <ul class="nav-links">
                 <li><a href="/">Home</a></li>
                 <li><a href="#about">About Us</a></li>
-                <li><a href="/recommend-history" >For you</a></li>
-                <li><a href="/collab-recommend/AE237R635P47DEL7T3CSBQDKMBRA" >Similar picks</a></li>
-                <li><a href="#contact">Contact Us</a></li>
-
+                {% if userid %}
+                    <li><a href="/recommend-history">For you</a></li>
+                    <li><a href="/collab-recommend/{{ userid }}">Similar picks</a></li>
+                    <li><a href="#contact">Contact Us</a></li>
+                    <li><a href="/logout">Logout</a></li>
+                {% else %}
+                    <li><a href="/signin">Sign In</a></li>  <!-- Sign In button if user isn't signed in -->
+                {% endif %}
             </ul>
         </div>
     </nav>
