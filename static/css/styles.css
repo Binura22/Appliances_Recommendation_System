@@ -240,10 +240,20 @@ footer {
 }
 
 .pagination {
-    text-align: center;
-    align-items: center;
+    margin: auto;
+    align-content: center;
     margin-top: 20px;
     max-width: 400px;
+}
+
+.move-button{
+    padding: auto;
+    margin: auto;
+    min-width: 120px;
+}
+.pgNo{
+    padding-top: 10px;
+    align-items: center;
 }
 
 .pagination a {
@@ -342,7 +352,7 @@ form {
 .category-dropdown {
     padding: 10px 15px; 
     font-size: 16px;
-    border: none; 
+    border: #555 1px solid; 
     border-radius: 0; 
     background-color: #f9f9f9; 
     background-image: linear-gradient(to bottom, #f9f9f9, #ffffff); 
@@ -447,4 +457,16 @@ button:hover {
     flex: 1; 
     letter-spacing: 1px; 
     font-weight: 700;
+}
+
+.operation-bar{
+    display: flex;
+    align-items: center;
+}
+.category-container{
+    width: 30%;
+}
+.search-container{
+    width: 80%;
+    padding-top: 20px;
 }

@@ -28,19 +28,6 @@
     <div class="container">
         <div class="banner">
             <h1>Discover Top Appliances in One Place</h1>
-
-            <!-- Category Dropdown -->
-            <form method="get" action="/">
-                <select name="category" id="category" class="category-dropdown" onchange="this.form.submit()">
-                    <option value="" disabled selected>Select Category</option>
-                    <option value="">All Categories</option>
-                    {% for category in categories %}
-                    <option value="{{ category }}" {% if selected_category==category %}selected{% endif %}>
-                        {{ category }}
-                    </option>
-                    {% endfor %}
-                </select>
-            </form>
         </div>
 
 
@@ -53,10 +40,29 @@
             <img src="{{ url_for('static', filename='images/app-banner5.jpg') }}" alt="Advertisement 5">
         </div>
 
-        <form action="/search" method="POST">
-            <input type="text" name="query" placeholder="Search Your Products">
-            <button type="submit">Search</button>
-        </form>
+        <div class="operation-bar">
+            <div class="search-container">
+                <form action="/search" method="POST">
+                    <input type="text" name="query" placeholder="Search Your Products">
+                    <button type="submit">Search</button>
+                </form>
+            </div>
+            <div class="category-container">
+                <!-- Category Dropdown -->
+                <form method="get" action="/">
+                    <select name="category" id="category" class="category-dropdown" onchange="this.form.submit()">
+                        <option value="" disabled selected>Select Category</option>
+                        <option value="">All Categories</option>
+                        {% for category in categories %}
+                        <option value="{{ category }}" {% if selected_category==category %}selected{% endif %}>
+                            {{ category }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </form>
+            </div>
+        </div>
+        
 
         <!-- Hot Products Section (Top 5 Seasonal Products) -->
         <section class="hot-products">
@@ -102,7 +108,7 @@
                 {% if page > 1 %}
                 <button class="move-button" type="submit" name="page" value="{{ page - 1 }}">Previous</button>
                 {% endif %}
-                <span>Page {{ page }}</span>
+                <span class="pgNo">Page {{ page }}</span>
                 <!-- Next Button -->
                 {% if results|length == 20 %}
                 <button class="move-button" type="submit" name="page" value="{{ page + 1 }}">Next</button>
