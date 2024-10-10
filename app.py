@@ -12,7 +12,7 @@ from models.user_browsing_history import UserBrowsingHistory
 
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:2001@localhost/Recommendation System'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:BdPS12#@localhost/Recommendation System'
 app.config['SECRET_KEY'] = '6433d2f2e94417d4acf2d7071225c2aa811e6ab7987a88cf'
 init_db(app)
 
