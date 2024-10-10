@@ -12,7 +12,7 @@ from models.user_browsing_history import UserBrowsingHistory
 
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:2001@localhost/Recommendation System'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:test1@localhost/Recommendation System'
 app.config['SECRET_KEY'] = '6433d2f2e94417d4acf2d7071225c2aa811e6ab7987a88cf'
 init_db(app)
 
@@ -22,21 +22,24 @@ output_csv = "ecommerce_data_new.csv"
 
 # Check if the file already exists locally, otherwise download it
 if not os.path.exists(output_csv):
-    gdown.download(f"https://drive.google.com/uc?export=download&id={drive_id}", output_csv, quiet=False)
+    gdown.download(
+        f"https://drive.google.com/uc?export=download&id={drive_id}", output_csv, quiet=False)
 
 # Load the datasets
 data = pd.read_csv(output_csv)
 
-#column data preprocessing 
+# column data preprocessing
 data['description'] = data['description'].str.strip("[]").str.replace("'", "")
 
 for index in data.index:
     if data.loc[index, 'main_category'] == "Amazon Home":
-        data.loc[index, 'main_category'] = data.loc[index, 'main_category'].replace("Amazon Home","Home Products")  
+        data.loc[index, 'main_category'] = data.loc[index,
+                                                    'main_category'].replace("Amazon Home", "Home Products")
     elif data.loc[index, 'main_category'] == "AMAZON FASHION":
-        data.loc[index, 'main_category'] = data.loc[index, 'main_category'].replace("AMAZON FASHION","Fashion")
+        data.loc[index, 'main_category'] = data.loc[index,
+                                                    'main_category'].replace("AMAZON FASHION", "Fashion")
 
-#Load the Appliances_content_based and cosine_sim_content matrix
+# Load the Appliances_content_based and cosine_sim_content matrix
 Appliances_content_based = pd.read_csv('Appliances_content_based.csv')
 cosine_sim_content = np.load('cosine_sim_content.npy')
 # Load the preprocessed user-item matrix
@@ -47,6 +50,8 @@ original_nan_mask = pd.read_csv('original_nan_mask.csv', index_col='user_id')
 data_unique = data.drop_duplicates(subset='parent_asin', keep='first')
 
 # Function to get the hi_res image link
+
+
 def get_hi_res_image(images):
     try:
         images_list = ast.literal_eval(images)
@@ -57,6 +62,7 @@ def get_hi_res_image(images):
     except Exception as e:
         return 'static/images/image-not-found.jpg'
 
+
 # Apply the function to the images column
 data_unique['hi_res_image'] = data_unique['images'].apply(get_hi_res_image)
 
@@ -65,37 +71,46 @@ data_unique['hi_res_image'] = data_unique['images'].apply(get_hi_res_image)
 user_similarity = cosine_similarity(user_item_matrix)
 
 # Function to get the top seasonatl products for the current month
+
+
 def get_top_seasonal_products():
-    #Convert timestamp column to datetime objects
+    # Convert timestamp column to datetime objects
     data['timestamp'] = pd.to_datetime(data['timestamp'])
     data['month'] = data['timestamp'].dt.month
-    
-    #Get current month
-    current_month = datetime.now().month
-    
-    #Group by asin ,month and count purchases
-    purchase_count = data.groupby(['asin', 'month']).size().reset_index(name='purchase_count')
-    
-    #Group by asin, month and calculate average ratings
-    average_rating = data.groupby(['asin', 'month'])['rating'].mean().reset_index(name='average_rating')
-    
-    #Merge purchase counts and average ratings
-    monthly_item_popularity = pd.merge(purchase_count, average_rating, on=['asin', 'month'])
-    
-    #sort by 'month' and 'purchase_count' to find the most popular items for each month
-    monthly_item_popularity  = monthly_item_popularity .sort_values(by=['month', 'purchase_count'], ascending=[True, False])
-    
+
+    # Get current month
     current_month = datetime.now().month
 
-    popular_items = monthly_item_popularity[monthly_item_popularity['month'] == current_month]
+    # Group by asin ,month and count purchases
+    purchase_count = data.groupby(
+        ['asin', 'month']).size().reset_index(name='purchase_count')
 
-    #Get top 5 ASINs
+    # Group by asin, month and calculate average ratings
+    average_rating = data.groupby(['asin', 'month'])[
+        'rating'].mean().reset_index(name='average_rating')
+
+    # Merge purchase counts and average ratings
+    monthly_item_popularity = pd.merge(
+        purchase_count, average_rating, on=['asin', 'month'])
+
+    # sort by 'month' and 'purchase_count' to find the most popular items for each month
+    monthly_item_popularity = monthly_item_popularity .sort_values(
+        by=['month', 'purchase_count'], ascending=[True, False])
+
+    current_month = datetime.now().month
+
+    popular_items = monthly_item_popularity[monthly_item_popularity['month']
+                                            == current_month]
+
+    # Get top 5 ASINs
     top_5_asins = popular_items['asin'][:6].tolist()
-    
-    #Fetch the product details
-    top_5_products = data_unique[data_unique['asin'].isin(top_5_asins)][['asin', 'product_title', 'hi_res_image', 'average_rating']]
-    
+
+    # Fetch the product details
+    top_5_products = data_unique[data_unique['asin'].isin(
+        top_5_asins)][['asin', 'product_title', 'hi_res_image', 'average_rating']]
+
     return top_5_products.to_dict(orient='records')
+
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
@@ -113,6 +128,7 @@ def signup():
         return redirect(url_for('signin'))
     return render_template('signup.html')
 
+
 @app.route('/signin', methods=['GET', 'POST'])
 def signin():
     if request.method == 'POST':
@@ -125,6 +141,7 @@ def signin():
             return redirect(url_for('index'))
         flash('Invalid username or password.')
     return render_template('signin.html')
+
 
 @app.route('/logout')
 def logout():
@@ -142,14 +159,16 @@ def index():
     per_page = 20  # Number of products per page
 
     if category:
-        paginated_data = data_unique[data_unique['main_category'] == category].iloc[(page - 1) * per_page: page * per_page]
+        paginated_data = data_unique[data_unique['main_category'] == category].iloc[(
+            page - 1) * per_page: page * per_page]
     else:
-        paginated_data = data_unique.iloc[(page - 1) * per_page: page * per_page]
+        paginated_data = data_unique.iloc[(
+            page - 1) * per_page: page * per_page]
 
     top_5_products = get_top_seasonal_products()
     print(top_5_products)
-    return render_template('index.html', results=paginated_data.to_dict(orient='records'), 
-                           top_5_products=top_5_products, page=page, selected_category=category,userid=userid)
+    return render_template('index.html', results=paginated_data.to_dict(orient='records'),
+                           top_5_products=top_5_products, page=page, selected_category=category, userid=userid)
 
 
 @app.route('/product/<asin>')
@@ -158,9 +177,10 @@ def product_detail(asin):
     product = data_unique[data_unique['asin'] == asin].iloc[0]
     # Get content-based recommendations for the product
     similar_products = get_recommendations_content(asin, top_n=5)
-    
+
     # Retrieve the detailed information of the recommended products
-    recommended_product_details = data_unique[data_unique['asin'].isin(similar_products)]
+    recommended_product_details = data_unique[data_unique['asin'].isin(
+        similar_products)]
 
     # Store the browsing history if the user is logged in
     if 'user_id' in session:
@@ -168,20 +188,23 @@ def product_detail(asin):
         new_history = UserBrowsingHistory(user_id=user_id, asin=asin)
         db.session.add(new_history)
         db.session.commit()
-    
+
     # Render the product detail page and pass the similar products
     return render_template('product_detail.html', product=product, recommended_products=recommended_product_details.to_dict(orient='records'))
 
+
 # Category-based dropdown items
-categories = ['Home Products', 'Appliances', 'Tools & Home Improvement', 'Health & Personal Care', 
-              'Industrial & Scientific', 'Grocery', 'Office Products', 'All Electronics', 
-              'Automotive', 'Cell Phones & Accessories', 'Sports & Outdoors', 'All Beauty', 
-              'Camera & Photo', 'Baby', 'Pet Supplies', 'Home Audio & Theater', 'Fashion', 
+categories = ['Home Products', 'Appliances', 'Tools & Home Improvement', 'Health & Personal Care',
+              'Industrial & Scientific', 'Grocery', 'Office Products', 'All Electronics',
+              'Automotive', 'Cell Phones & Accessories', 'Sports & Outdoors', 'All Beauty',
+              'Camera & Photo', 'Baby', 'Pet Supplies', 'Home Audio & Theater', 'Fashion',
               'Musical Instruments', 'Toys & Games', 'Portable Audio & Accessories', 'Books']
+
 
 @app.context_processor
 def inject_categories():
     return dict(categories=categories)
+
 
 @app.route('/collab-recommend/<user_id>')
 def collab_recommend(user_id):
@@ -189,46 +212,51 @@ def collab_recommend(user_id):
     if user_id not in user_item_matrix.index:
         return render_template('recommendations.html', message='No recommendations available at the moment. Start browsing our products to unlock personalized suggestions!')
 
-    
     # Use original_nan_mask to find unrated items (originally NaN)
     unrated_items = original_nan_mask.loc[user_id]
-    unrated_items = unrated_items[unrated_items].index  # Filter the originally unrated items
-    
+    # Filter the originally unrated items
+    unrated_items = unrated_items[unrated_items].index
+
     if len(unrated_items) == 0:
         return render_template('recommendations.html', message='No recommendations available at the moment. Start browsing our products to unlock personalized suggestions!')
-    
+
     # Compute similarity scores between the target user and other users
-    similarity_scores = user_similarity[user_item_matrix.index.get_loc(user_id)]
+    similarity_scores = user_similarity[user_item_matrix.index.get_loc(
+        user_id)]
 
     # Sort users by similarity scores (excluding the user themselves)
     similar_users_indices = similarity_scores.argsort()[::-1][1:]
-    
+
     # Get the ratings of similar users for the unrated items
     similar_users_ratings = user_item_matrix.iloc[similar_users_indices][unrated_items]
 
     # Calculate predicted ratings for the unrated items based on similar users' ratings
-    weighted_ratings = similar_users_ratings.T.dot(similarity_scores[similar_users_indices])
+    weighted_ratings = similar_users_ratings.T.dot(
+        similarity_scores[similar_users_indices])
     similarity_sums = similarity_scores[similar_users_indices].sum()
 
     predicted_ratings = weighted_ratings / similarity_sums
-    
-    #Recommended top 5 items
+
+    # Recommended top 5 items
     top_recommended_items = predicted_ratings.nlargest(10).index
-    
+
     # Retrieve product details from the original dataset for these recommendations
 
-    recommended_products = data_unique[data_unique['asin'].isin(top_recommended_items)][['asin', 'product_title', 'hi_res_image', 'average_rating']]
+    recommended_products = data_unique[data_unique['asin'].isin(
+        top_recommended_items)][['asin', 'product_title', 'hi_res_image', 'average_rating']]
 
     # If no products found, return a message
     if recommended_products.empty:
         return render_template('recommendations.html', message='No recommendations available at the moment. Start browsing our products to unlock personalized suggestions!')
-    
+
     # Render the recommendations page with the recommended products
     return render_template('recommendations.html', products=recommended_products.to_dict(orient='records'), user_id=user_id)
 
 
 # recommendation function for content-based recommendations
-asin_index_content = pd.Series(Appliances_content_based.index, index=Appliances_content_based['asin']).drop_duplicates()
+asin_index_content = pd.Series(
+    Appliances_content_based.index, index=Appliances_content_based['asin']).drop_duplicates()
+
 
 def get_recommendations_content(asin, cosine_sim=cosine_sim_content, top_n=5):
     # Check if 'asin' exists in the dataset
@@ -249,10 +277,10 @@ def get_recommendations_content(asin, cosine_sim=cosine_sim_content, top_n=5):
 
     # Get the product indices
     product_indices = [i[0] for i in sim_scores]
-    
 
     # Return the top N most similar products
     return Appliances_content_based['asin'].iloc[product_indices].drop_duplicates()
+
 
 @app.route('/recommend-content/<asin>')
 def recommend_content(asin):
@@ -264,7 +292,8 @@ def recommend_content(asin):
         return f"No recommendations available for product {asin}", 200
 
     # Retrieve product details from the original dataset for these recommendations
-    recommended_product_details = Appliances_content_based[Appliances_content_based['asin'].isin(recommended_products)]
+    recommended_product_details = Appliances_content_based[Appliances_content_based['asin'].isin(
+        recommended_products)]
 
     # Render the recommendations page with the recommended products
     return render_template('recommendations.html', products=recommended_product_details.to_dict(orient='records'), asin=asin)
@@ -275,9 +304,10 @@ def recommend_based_on_history():
     if 'user_id' not in session:
         flash("Please log in to see recommendations.")
         return redirect(url_for('signin'))
-    
+
     user_id = session['user_id']
-    history_asins = db.session.query(UserBrowsingHistory.asin).filter_by(user_id=user_id).all()
+    history_asins = db.session.query(
+        UserBrowsingHistory.asin).filter_by(user_id=user_id).all()
     history_asins = [asin for asin, in history_asins]
 
     if not history_asins:
@@ -286,13 +316,70 @@ def recommend_based_on_history():
     # Get content-based recommendations for all asins in the browsing history
     recommended_products = []
     for asin in history_asins:
-        recommended_products += get_recommendations_content(asin, top_n=2).tolist()
+        recommended_products += get_recommendations_content(
+            asin, top_n=2).tolist()
 
     # Remove duplicates
     recommended_products = list(set(recommended_products))
-    recommended_product_details = data_unique[data_unique['asin'].isin(recommended_products)]
+    recommended_product_details = data_unique[data_unique['asin'].isin(
+        recommended_products)]
 
     return render_template('recommendation-history.html', products=recommended_product_details.to_dict(orient='records'))
+
+# @app.route('/hybrid-recommend/<user_id>/<asin>')
+# def hybrid_recommend(user_id, asin, collab_weight=0.5, content_weight=0.5):
+#     """
+#     Hybrid recommendation combining collaborative filtering and content-based filtering.
+#     """
+
+#     ### 1. Collaborative Filtering Part
+#     if user_id not in user_item_matrix.index:
+#         collab_recommendations = []
+#     else:
+#         unrated_items = original_nan_mask.loc[user_id]
+#         unrated_items = unrated_items[unrated_items].index
+
+#         if len(unrated_items) > 0:
+#             similarity_scores = user_similarity[user_item_matrix.index.get_loc(user_id)]
+#             similar_users_indices = similarity_scores.argsort()[::-1][1:]
+#             similar_users_ratings = user_item_matrix.iloc[similar_users_indices][unrated_items]
+
+#             weighted_ratings = similar_users_ratings.T.dot(similarity_scores[similar_users_indices])
+#             similarity_sums = similarity_scores[similar_users_indices].sum()
+#             predicted_ratings = weighted_ratings / similarity_sums
+
+#             collab_recommendations = predicted_ratings.nlargest(5).index.tolist()
+#         else:
+#             collab_recommendations = []
+
+#     ### 2. Content-Based Filtering Part
+#     content_recommendations = get_recommendations_content(asin, top_n=5)
+
+#     if content_recommendations.empty:
+#         content_recommendations = []
+#     else:
+#         content_recommendations = content_recommendations.tolist()
+
+#     ### 3. Hybrid Recommendation
+#     combined_recommendations = set(collab_recommendations + content_recommendations)
+
+#     final_scores = {}
+#     for item in combined_recommendations:
+#         score_collab = predicted_ratings.get(item, 0) if item in collab_recommendations else 0
+#         score_content = 1 if item in content_recommendations else 0
+
+#         final_scores[item] = (collab_weight * score_collab) + (content_weight * score_content)
+
+#     sorted_items = sorted(final_scores, key=final_scores.get, reverse=True)
+
+#     ### 4. Retrieve Product Details
+#     recommended_products = data_unique[data_unique['asin'].isin(sorted_items)][['asin', 'product_title', 'hi_res_image', 'average_rating']]
+
+#     if recommended_products.empty:
+#         return render_template('recommendations.html', message='No recommendations available at the moment.')
+
+#     ### 5. Render Recommendations
+#     return render_template('recommendations.html', products=recommended_products.to_dict(orient='records'), user_id=user_id)
 
 
 @app.route('/search', methods=['POST', 'GET'])
@@ -301,14 +388,16 @@ def search():
     if request.method == 'POST':
         query = request.form['query']
     else:
-        query = request.args.get('query', '')  # Get the query from URL parameters if navigating through pages
+        # Get the query from URL parameters if navigating through pages
+        query = request.args.get('query', '')
 
     # Filter results by product title or main category
     results = data_unique[
         (data_unique['product_title'].str.contains(query, case=False, na=False)) |
-        (data_unique['main_category'].str.contains(query, case=False, na=False))
+        (data_unique['main_category'].str.contains(
+            query, case=False, na=False))
     ]
-    
+
     # Pagination logic
     page = request.args.get('page', 1, type=int)  # Get the current page number
     per_page = 20  # Items per page
@@ -318,9 +407,9 @@ def search():
     top_5_products = get_top_seasonal_products()
 
     # Render the search results with pagination
-    return render_template('index.html', query=query, results=paginated_results.to_dict(orient='records'), 
+    return render_template('index.html', query=query, results=paginated_results.to_dict(orient='records'),
                            top_5_products=top_5_products, page=page)
-  
+
 
 if __name__ == '__main__':
     app.run(debug=True)
