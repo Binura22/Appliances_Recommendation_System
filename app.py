@@ -154,6 +154,7 @@ def index():
 
 @app.route('/product/<asin>')
 def product_detail(asin):
+    userid = session.get('user_id', None)
     # Filter the product by asin for detailed view
     product = data_unique[data_unique['asin'] == asin].iloc[0]
     # Get content-based recommendations for the product
@@ -170,7 +171,7 @@ def product_detail(asin):
         db.session.commit()
     
     # Render the product detail page and pass the similar products
-    return render_template('product_detail.html', product=product, recommended_products=recommended_product_details.to_dict(orient='records'))
+    return render_template('product_detail.html', product=product, recommended_products=recommended_product_details.to_dict(orient='records'),userid=userid)
 
 # Category-based dropdown items
 categories = ['Home Products', 'Appliances', 'Tools & Home Improvement', 'Health & Personal Care', 
@@ -256,6 +257,7 @@ def get_recommendations_content(asin, cosine_sim=cosine_sim_content, top_n=5):
 
 @app.route('/recommend-content/<asin>')
 def recommend_content(asin):
+    userid = session.get('user_id', None)
     # Get content-based recommendations
     recommended_products = get_recommendations_content(asin, top_n=5)
 
@@ -267,7 +269,7 @@ def recommend_content(asin):
     recommended_product_details = Appliances_content_based[Appliances_content_based['asin'].isin(recommended_products)]
 
     # Render the recommendations page with the recommended products
-    return render_template('recommendations.html', products=recommended_product_details.to_dict(orient='records'), asin=asin)
+    return render_template('recommendations.html', products=recommended_product_details.to_dict(orient='records'), asin=asin, userid = userid)
 
 
 @app.route('/recommend-history')
@@ -292,7 +294,7 @@ def recommend_based_on_history():
     recommended_products = list(set(recommended_products))
     recommended_product_details = data_unique[data_unique['asin'].isin(recommended_products)]
 
-    return render_template('recommendation-history.html', products=recommended_product_details.to_dict(orient='records'))
+    return render_template('recommendation-history.html', products=recommended_product_details.to_dict(orient='records'),userid=user_id)
 
 
 @app.route('/search', methods=['POST', 'GET'])
